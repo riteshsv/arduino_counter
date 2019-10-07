@@ -25,7 +25,7 @@
 /*
  * Start Address of EEPROM
  */
- #define EEP_START_ADDR 0
+#define EEP_START_ADDR 0
 
 /*Pin setup*/
 #define TRIG 8
@@ -34,7 +34,7 @@
 //globals
 unsigned long duration;
 int distance;
-unsigned int count = 0;
+unsigned int count;
 uint8_t entry_start=0;
 uint8_t entry_stop=0;
 
@@ -45,20 +45,14 @@ void saveCount(unsigned int count){
   }
 }
 
-
-void setup() {
-  // set up the Ultrasonic sensor 
-    pinMode(TRIG,OUTPUT);   
-    pinMode(ECHO,INPUT);
-
-    lcd.begin(16, 2);                               //set up lcd cols and rows (16 cols and 2 rows)
-    lcd.print("Hi-Tech Counter");                   // Print a message to the LCD.
-    
-    Serial.begin(9600);           /*start the serial communication at 9600 baud rate*/
-
+void writeToLcd(){
+    //write to the lcd
+  lcd.setCursor(0,0);
+  lcd.print("Count: ");
+  lcd.print(count);
 }
 
-void loop() {
+void runUltraSonicCounter(){
   digitalWrite(TRIG,LOW);
   delayMicroseconds(2);
 
@@ -85,16 +79,47 @@ void loop() {
     if((count % 25) == 0){                            
       saveCount(count);                                 /*update count to store*/
     }
+  }
   Serial.print("Count: \t");
   Serial.print(count);
   Serial.print("\tDistance: \t");
   Serial.print(distance);
   Serial.print(" cm\n");
+
+  writeToLcd();
+}
+
+void setup() {
+  //read initial count state
+  //EEPROM.put(EEP_START_ADDR,count);
+  EEPROM.get(EEP_START_ADDR,count);
   
-  //write to the lcd
-//  lcd.setCursor(0,0);
-//  lcd.print("Count:");
-//  lcd.print(count);
+  // set up the Ultrasonic sensor 
+  pinMode(TRIG,OUTPUT);   
+  pinMode(ECHO,INPUT);
+
+    lcd.begin(16, 2);                               //set up lcd cols and rows (16 cols and 2 rows)
+    //lcd.print("Hi-Tech Counter");                   // Print a message to the LCD.
+    
+    Serial.begin(9600);           /*start the serial communication at 9600 baud rate*/
+//    if(count == 65535){
+//      count = 0;
+//    }
+//    Serial.print(count);
+//    count = 50;
+//    if((count % 25) == 0){                            
+//      saveCount(count);                                 /*update count to store*/
+//    }
+//   
+//    EEPROM.get(EEP_START_ADDR,count);
+//    Serial.print(count);
+}
+
+void loop() {
+  runUltraSonicCounter();
+  
+  
+
  
   
 }
